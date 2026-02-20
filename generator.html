@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Generate Bubble Sheet</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #e3f2fd, #f9fbfe);
+      margin: 0;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    /* Floating math symbols background */
+    .floating-symbol {
+      position: absolute;
+      font-size: 30px;
+      font-weight: bold;
+      color: rgba(60, 60, 60, 0.08);
+      user-select: none;
+      animation: float 14s linear infinite;
+      z-index: 1;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0.15;
+      }
+
+      50% {
+        opacity: 0.25;
+      }
+
+      100% {
+        transform: translateY(-800px) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    /* Back Button: Fixed to Upper Left */
+    .back-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background-color: #add8e6;
+      /* Light Blue */
+      color: #0d47a1;
+      border: none;
+      padding: 10px 18px;
+      font-size: 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+    }
+
+    .back-btn:hover {
+      background-color: #90ccdf;
+      transform: scale(1.05);
+    }
+
+    /* Container box */
+    .container {
+      position: relative;
+      background: #ffffff;
+      padding: 35px 50px;
+      border-radius: 16px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+      max-width: 420px;
+      text-align: center;
+    }
+
+    h2 {
+      color: #0d47a1;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      letter-spacing: 1px;
+    }
+
+    label {
+      font-weight: 600;
+      display: inline-block;
+      margin-top: 10px;
+      color: #333;
+    }
+
+    input,
+    select {
+      padding: 10px;
+      margin-top: 6px;
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+
+    /* Generate Button: Green */
+    #generateBtn {
+      background-color: #388e3c;
+      /* Green */
+      color: white;
+      border: none;
+      padding: 15px 22px;
+      margin-top: 25px;
+      font-size: 18px;
+      font-weight: bold;
+      border-radius: 10px;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.3s;
+      box-shadow: 0 4px 12px rgba(56, 142, 60, 0.3);
+    }
+
+    #generateBtn:hover {
+      background-color: #2e7d32;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="floating-symbol" style="left:10%; animation-delay:1s;">+</div>
+  <div class="floating-symbol" style="left:40%; animation-delay:5s;">÷</div>
+  <div class="floating-symbol" style="left:80%; animation-delay:3s;">√</div>
+
+  <button class="back-btn" onclick="window.location.href='index.html'">⬅ Back to Home</button>
+
+  <div class="container">
+    <h2>✨ Create Bubble Sheets ✨</h2>
+
+    <div>
+      <label for="schoolName">School Name:</label>
+      <input type="text" id="schoolName" placeholder="Enter your school name">
+
+      <label for="testName">Test Title:</label>
+      <input type="text" id="testName" placeholder="e.g. Algebra Quiz">
+
+      <label for="numQuestions">Number of Questions:</label>
+      <input type="number" id="numQuestions" min="1" max="100" value="10">
+
+      <label for="numChoices">Choices per Question:</label>
+      <select id="numChoices">
+        <option value="3">A–C</option>
+        <option value="4">A–D</option>
+        <option value="5">A–E</option>
+      </select>
+
+      <button id="generateBtn">📄 Generate & Download PDF</button>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="generator.js"></script>
+</body>
+
+</html>

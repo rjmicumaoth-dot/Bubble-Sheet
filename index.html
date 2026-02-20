@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teacher Bubble Sheet Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    /* ===== General Page Style ===== */
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #e3f2fd, #f3f8ff);
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      color: #0d47a1;
+    }
+
+    /* ===== Floating Math Symbols ===== */
+    .floating-symbol {
+      position: absolute;
+      font-size: 40px;
+      font-weight: bold;
+      color: rgba(13, 71, 161, 0.08);
+      animation: float 16s linear infinite;
+      user-select: none;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0.2;
+      }
+
+      50% {
+        opacity: 0.4;
+      }
+
+      100% {
+        transform: translateY(-120vh) rotate(360deg);
+        opacity: 0.1;
+      }
+    }
+
+    /* ===== Main Container ===== */
+    .container {
+      background: #ffffff;
+      padding: 60px 80px;
+      border-radius: 20px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+      text-align: center;
+      position: relative;
+      z-index: 10;
+      max-width: 480px;
+    }
+
+    h1 {
+      color: #0d47a1;
+      margin-bottom: 15px;
+      font-size: 28px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    p.subtitle {
+      color: #444;
+      font-size: 16px;
+      margin-bottom: 40px;
+      font-style: italic;
+    }
+
+    /* ===== Buttons ===== */
+    .btn {
+      display: block;
+      width: 100%;
+      background-color: #0d47a1;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 17px 0;
+      margin: 15px 0;
+      font-size: 18px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+      box-shadow: 0 6px 14px rgba(13, 71, 161, 0.3);
+    }
+
+    .btn:hover {
+      background-color: #1565c0;
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background-color: #388e3c;
+      box-shadow: 0 6px 14px rgba(56, 142, 60, 0.3);
+    }
+
+    .btn-secondary:hover {
+      background-color: #2e7d32;
+    }
+
+    footer {
+      margin-top: 30px;
+      color: #777;
+      font-size: 13px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Floating Math Background -->
+  <div class="floating-symbol" style="left: 10%; animation-delay: 0s;">×</div>
+  <div class="floating-symbol" style="left: 25%; animation-delay: 2s;">÷</div>
+  <div class="floating-symbol" style="left: 40%; animation-delay: 4s;">+</div>
+  <div class="floating-symbol" style="left: 60%; animation-delay: 1s;">=</div>
+  <div class="floating-symbol" style="left: 80%; animation-delay: 3s;">–</div>
+  <div class="floating-symbol" style="left: 90%; animation-delay: 5s;">√</div>
+
+  <div class="container">
+    <h1>Teacher's Bubble Sheet Portal</h1>
+    <p class="subtitle">Simplify your test process — create, print, and check bubble sheets effortlessly.</p>
+
+    <button class="btn" onclick="window.location.href='generator.html'">📝 Create Bubble Sheets</button>
+
+
+
+
+    <footer>Made with ❤️ for Teachers</footer>
+  </div>
+</body>
+
+</html>

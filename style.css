@@ -1,0 +1,39 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #f2f5f9;
+  height: 100vh;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.container {
+  text-align: center;
+}
+
+button {
+  display: block;
+  width: 260px;
+  margin: 20px auto;
+  padding: 20px;
+  font-size: 20px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+button:first-of-type {
+  background: #007bff;
+  color: white;
+}
+
+button:last-of-type {
+  background: #28a745;
+  color: white;
+}
+
+button:hover {
+  opacity: 0.9;
+}
