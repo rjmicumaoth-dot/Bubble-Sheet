@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Column Scanner</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Material+Icons&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f4f7f6;
+      margin: 0;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .back-btn {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      background-color: #add8e6;
+      color: #0d47a1;
+      border: none;
+      padding: 8px 15px;
+      font-size: 13px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      text-decoration: none;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .container {
+      background: #fff;
+      margin-top: 60px;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+      box-sizing: border-box;
+    }
+
+    #video,
+    #crop-area {
+      width: 100%;
+      border-radius: 10px;
+      border: 3px solid #0d47a1;
+      background: #000;
+    }
+
+    #crop-area {
+      display: none;
+      margin-top: 10px;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: 0.3s;
+    }
+
+    .btn-capture {
+      background: #0d47a1;
+      color: white;
+    }
+
+    .btn-analyze {
+      background: #388e3c;
+      color: white;
+      display: none;
+    }
+
+    .btn-retry {
+      background: #d32f2f;
+      color: white;
+      display: none;
+    }
+
+    .status {
+      font-size: 12px;
+      color: #666;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <a href="index.html" class="back-btn">⬅ Back to Home</a>
+
+  <div class="container">
+    <h2>🧠 Column Scanner AI</h2>
+    <p id="msg">Crop ONLY the column of bubbles (e.g., 1-25).</p>
+
+    <video id="video" autoplay playsinline></video>
+    <div id="crop-area"><img id="ready-image"></div>
+
+    <button id="captureBtn" class="btn btn-capture">📸 Take Photo</button>
+    <button id="analyzeBtn" class="btn btn-analyze">🎯 AI Analysis</button>
+    <button id="retryBtn" class="btn btn-retry">🔄 Retake Photo</button>
+    <div id="status" class="status">Initializing AI...</div>
+  </div>
+
+  <canvas id="hiddenCanvas" style="display:none;"></canvas>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+  <script async src="https://docs.opencv.org/3.4.0/opencv.js"
+    onload="document.getElementById('status').innerText='AI Ready! ✅'"></script>
+
+  <script>
+    const video = document.getElementById('video');
+    const captureBtn = document.getElementById('captureBtn');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const retryBtn = document.getElementById('retryBtn');
+    const cropArea = document.getElementById('crop-area');
+    const readyImage = document.getElementById('ready-image');
+    let cropper;
+
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+      .then(stream => { video.srcObject = stream; })
+      .catch(err => alert("Camera Error: " + err));
+
+    captureBtn.addEventListener('click', () => {
+      const canvas = document.getElementById('hiddenCanvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext('2d').drawImage(video, 0, 0);
+      readyImage.src = canvas.toDataURL('image/png');
+
+      video.style.display = 'none';
+      captureBtn.style.display = 'none';
+      cropArea.style.display = 'block';
+      analyzeBtn.style.display = 'block';
+      retryBtn.style.display = 'block';
+
+      if (cropper) cropper.destroy();
+      cropper = new Cropper(readyImage, { viewMode: 1, autoCropArea: 0.95 });
+    });
+
+    retryBtn.addEventListener('click', () => { location.reload(); });
+
+    analyzeBtn.addEventListener('click', () => {
+      const croppedCanvas = cropper.getCroppedCanvas();
+      let src = cv.imread(croppedCanvas);
+
+      const results = aiGridDetect(src);
+
+      if (results.length > 0) {
+        localStorage.setItem('tempKey', JSON.stringify(results));
+        window.location.href = 'validate_key.html';
+      } else {
+        alert("AI could not map the grid. Ensure your crop is tight around the bubbles.");
+      }
+      src.delete();
+    });
+
+    function aiGridDetect(src) {
+      let gray = new cv.Mat();
+      let thresh = new cv.Mat();
+      cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY, 0);
+
+      // Shadow Correction
+      let clahe = new cv.CLAHE(2.0, new cv.Size(8, 8));
+      clahe.apply(gray, gray);
+
+      cv.adaptiveThreshold(gray, thresh, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY_INV, 11, 2);
+
+      const numChoices = parseInt(localStorage.getItem('numChoices')) || 5;
+      // Force 25 rows for a single column of a 50-item sheet
+      const numRows = 25;
+
+      const letters = ["A", "B", "C", "D", "E"];
+      let results = [];
+
+      const cellH = thresh.rows / numRows;
+      const cellW = thresh.cols / numChoices;
+
+      for (let r = 0; r < numRows; r++) {
+        let maxInk = -1;
+        let bestC = 0;
+
+        for (let c = 0; c < numChoices; c++) {
+          let rect = new cv.Rect(Math.floor(c * cellW), Math.floor(r * cellH), Math.floor(cellW), Math.floor(cellH));
+          let roi = thresh.roi(rect);
+          let inkLevel = cv.mean(roi)[0]; // Measuring density
+          roi.delete();
+
+          if (inkLevel > maxInk) {
+            maxInk = inkLevel;
+            bestC = c;
+          }
+        }
+        results.push(letters[bestC]);
+      }
+
+      gray.delete(); thresh.delete(); clahe.delete();
+      return results;
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Answer Key</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            padding: 20px;
+            background: #f4f7f6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+        }
+
+        h2 {
+            color: #0d47a1;
+            text-align: center;
+            margin-top: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background: #e3f2fd;
+            color: #0d47a1;
+        }
+
+        select {
+            padding: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 100%;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 16px;
+        }
+
+        .btn-save {
+            background: #0d47a1;
+            color: white;
+        }
+
+        .btn-retry {
+            background: #d32f2f;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="card">
+        <h2>✅ Verify Results</h2>
+        <p style="text-align: center; font-size: 14px; color: #666;">Check if these match your key. Adjust if needed.
+        </p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Correct Answer</th>
+                </tr>
+            </thead>
+            <tbody id="keyTable"></tbody>
+        </table>
+
+        <div class="btn-group">
+            <button class="btn btn-save" onclick="saveKey()">💾 Save & Finish</button>
+            <button class="btn btn-retry" onclick="window.location.href='checker.html'">🔄 Retry Scan</button>
+        </div>
+    </div>
+
+    <script>
+        const tempAnswers = JSON.parse(localStorage.getItem('tempKey') || "[]");
+        const tableBody = document.getElementById('keyTable');
+
+        // Populate table with dropdowns for 100% accuracy
+        tempAnswers.forEach((ans, i) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+        <td>${i + 1}</td>
+        <td>
+          <select class="ans-dropdown">
+            <option value="A" ${ans === 'A' ? 'selected' : ''}>A</option>
+            <option value="B" ${ans === 'B' ? 'selected' : ''}>B</option>
+            <option value="C" ${ans === 'C' ? 'selected' : ''}>C</option>
+            <option value="D" ${ans === 'D' ? 'selected' : ''}>D</option>
+            <option value="E" ${ans === 'E' ? 'selected' : ''}>E</option>
+          </select>
+        </td>
+      `;
+            tableBody.appendChild(tr);
+        });
+
+        function saveKey() {
+            const finalKey = Array.from(document.querySelectorAll('.ans-dropdown')).map(sel => sel.value);
+            localStorage.setItem('teacherKey', JSON.stringify(finalKey));
+            alert("Answer Key Saved Successfully!");
+            window.location.href = 'index.html'; // Or your next page
+        }
+    </script>
+</body>
+
+</html>

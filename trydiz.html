@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Bubble Sheet Scanner</title>
+    <script async src="https://docs.opencv.org/4.x/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
+
+    <style>
+        body {
+            font-family: Arial;
+        }
+
+        video,
+        canvas {
+            width: 400px;
+            margin: 10px;
+        }
+
+        button {
+            padding: 10px;
+            margin: 10px;
+        }
+
+        #output {
+            white-space: pre;
+            font-family: monospace;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Bubble Sheet Scanner</h2>
+
+    <video id="video" autoplay></video><br>
+    <button onclick="capture()">Capture</button>
+    <canvas id="canvas"></canvas>
+
+    <h3>Detected Answers:</h3>
+    <div id="output">Waiting for capture...</div>
+
+    <script>
+
+        let video = document.getElementById("video");
+        let canvas = document.getElementById("canvas");
+        let ctx = canvas.getContext("2d");
+        let opencvReady = false;
+
+        function onOpenCvReady() {
+            console.log("OpenCV ready");
+            opencvReady = true;
+        }
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => video.srcObject = stream);
+
+        function capture() {
+            if (!opencvReady) {
+                alert("OpenCV not loaded yet!");
+                return;
+            }
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+            processImage();
+        }
+
+        function processImage() {
+
+            let src = cv.imread(canvas);
+            let gray = new cv.Mat();
+            let blur = new cv.Mat();
+            let thresh = new cv.Mat();
+
+            cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
+            cv.GaussianBlur(gray, blur, new cv.Size(5, 5), 0);
+
+            cv.adaptiveThreshold(
+                blur,
+                thresh,
+                255,
+                cv.ADAPTIVE_THRESH_GAUSSIAN_C,
+                cv.THRESH_BINARY_INV,
+                15,
+                3
+            );
+
+            let contours = new cv.MatVector();
+            let hierarchy = new cv.Mat();
+
+            cv.findContours(
+                thresh,
+                contours,
+                hierarchy,
+                cv.RETR_EXTERNAL,
+                cv.CHAIN_APPROX_SIMPLE
+            );
+
+            let bubbles = [];
+
+            for (let i = 0; i < contours.size(); i++) {
+                let cnt = contours.get(i);
+                let rect = cv.boundingRect(cnt);
+                let area = cv.contourArea(cnt);
+                let ratio = rect.width / rect.height;
+
+                if (area > 300 && area < 3000 && ratio > 0.8 && ratio < 1.2) {
+                    bubbles.push({ rect: rect });
+                }
+            }
+
+            if (bubbles.length < 200) {
+                document.getElementById("output").innerText =
+                    "Not enough bubbles detected.\nDetected: " + bubbles.length;
+                cleanup();
+                return;
+            }
+
+            // Split left and right halves
+            let midX = canvas.width / 2;
+            let left = bubbles.filter(b => b.rect.x < midX);
+            let right = bubbles.filter(b => b.rect.x >= midX);
+
+            left.sort((a, b) => a.rect.y - b.rect.y);
+            right.sort((a, b) => a.rect.y - b.rect.y);
+
+            let answers = [];
+
+            function processColumn(column, questionOffset) {
+
+                for (let i = 0; i < column.length; i += 5) {
+
+                    let row = column.slice(i, i + 5);
+                    row.sort((a, b) => a.rect.x - b.rect.x);
+
+                    if (row.length < 5) continue;
+
+                    let maxFill = 0;
+                    let selected = -1;
+
+                    for (let j = 0; j < 5; j++) {
+                        let roi = thresh.roi(row[j].rect);
+                        let fill = cv.countNonZero(roi);
+                        roi.delete();
+
+                        if (fill > maxFill) {
+                            maxFill = fill;
+                            selected = j;
+                        }
+                    }
+
+                    if (selected >= 0) {
+                        answers.push(
+                            (questionOffset + (i / 5) + 1) + ". " +
+                            String.fromCharCode(65 + selected)
+                        );
+                    }
+                }
+            }
+
+            processColumn(left, 0);
+            processColumn(right, 25);
+
+            if (answers.length === 0) {
+                document.getElementById("output").innerText =
+                    "No answers detected.";
+            } else {
+                document.getElementById("output").innerText =
+                    answers.join("\n");
+            }
+
+            cleanup();
+
+            function cleanup() {
+                src.delete();
+                gray.delete();
+                blur.delete();
+                thresh.delete();
+                contours.delete();
+                hierarchy.delete();
+            }
+        }
+
+    </script>
+
+</body>
+
+</html>
